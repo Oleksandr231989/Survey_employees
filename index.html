@@ -30,6 +30,8 @@
             padding: 20px;
             text-align: center;
             position: relative;
+            padding-top: 25px;
+            padding-bottom: 25px;
         }
         
         .header h1 {
@@ -218,32 +220,47 @@
         /* Language Toggle */
         .language-toggle {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 20px;
+            right: 20px;
             display: flex;
-            background-color: rgba(255, 255, 255, 0.2);
+            background-color: white;
             border-radius: 4px;
             overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
         }
         
         .language-toggle button {
             background: none;
             border: none;
-            color: white;
-            padding: 5px 10px;
+            color: #2563eb;
+            padding: 6px 12px;
             font-size: 0.9rem;
+            font-weight: 600;
             cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.2s, background-color 0.2s;
+            transition: background-color 0.2s, color 0.2s;
         }
         
         .language-toggle button.active {
-            background-color: rgba(255, 255, 255, 0.3);
-            opacity: 1;
+            background-color: #2563eb;
+            color: white;
         }
         
-        .language-toggle button:hover {
-            opacity: 1;
+        .language-toggle button:hover:not(.active) {
+            background-color: #f3f4f6;
+        }
+        
+        @media (max-width: 640px) {
+            .header {
+                padding-top: 50px;
+                position: relative;
+            }
+            
+            .language-toggle {
+                top: 10px;
+                right: 50%;
+                transform: translateX(50%);
+            }
         }
     </style>
 </head>
