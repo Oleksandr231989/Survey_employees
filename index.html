@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>2024 Annual Performance Review Cycle - Employees Survey</title>
     <style>
         /* General styling */
@@ -169,6 +169,14 @@
             display: none;
         }
         
+        /* Conditional questions - mobile adjustments */
+        @media (max-width: 640px) {
+            .conditional-question {
+                margin-left: 16px;
+                padding-left: 12px;
+            }
+        }
+        
         /* Thank you message */
         .thank-you {
             text-align: center;
@@ -252,14 +260,41 @@
             background-color: #f3f4f6;
         }
         
+        /* Mobile Responsiveness */
         @media (max-width: 640px) {
+            .container {
+                max-width: 100%;
+                margin: 0;
+                border-radius: 0;
+            }
+            
             .header {
-                padding-top: 25px;
+                padding-top: 45px; /* Slightly more padding on mobile */
+            }
+            
+            .header h1 {
+                font-size: 1.2rem; /* Smaller font size on mobile */
             }
             
             .language-toggle {
-                top: 20px;
-                right: 20px;
+                top: 10px;
+                right: 10px;
+            }
+            
+            .form-container {
+                padding: 16px; /* Reduced padding on mobile */
+            }
+            
+            .question {
+                margin-bottom: 24px; /* Reduced spacing between questions */
+            }
+            
+            select, textarea {
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            
+            .button-group {
+                justify-content: center; /* Center the submit button on mobile */
             }
         }
     </style>
