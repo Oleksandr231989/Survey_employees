@@ -544,6 +544,8 @@
                         manager_discussion_quality: document.querySelector('input[name="q7"]:checked')?.value || ''
                     };
                     
+                    console.log('Form data being sent:', JSON.stringify(formData));
+                    
                     // Send data to API endpoint
                     const response = await fetch('/api/submit-survey', {
                         method: 'POST',
@@ -553,9 +555,13 @@
                         body: JSON.stringify(formData)
                     });
                     
+                    console.log('Response status:', response.status);
+                    
+                    const result = await response.json();
+                    console.log('Response data:', result);
+                    
                     if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Failed to submit survey');
+                        throw new Error(result.error || 'Failed to submit survey');
                     }
                     
                     // Show thank you page
@@ -564,7 +570,7 @@
                     window.scrollTo(0, 0);
                 } catch (error) {
                     console.error('Error submitting form:', error);
-                    alert('There was an error submitting your survey. Please try again.');
+                    alert('Error: ' + error.message + '. Please try again or contact support.');
                     
                     // Reset button state
                     submitButton.disabled = false;
