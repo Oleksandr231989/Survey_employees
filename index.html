@@ -184,6 +184,35 @@
             font-size: 0.875rem;
             color: #6b7280;
         }
+
+        /* Loading indicator */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            display: none;
+        }
+        
+        .is-loading .loading-text {
+            display: inline;
+        }
+        
+        .is-loading .normal-text {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -397,7 +426,11 @@
             </div>
             
             <div class="button-group">
-                <button type="button" class="btn-submit" onclick="submitForm()">Submit</button>
+                <button type="button" class="btn-submit" onclick="submitForm()">
+                    <span class="spinner" style="display: none;"></span>
+                    <span class="normal-text">Submit</span>
+                    <span class="loading-text">Submitting...</span>
+                </button>
             </div>
         </div>
         
@@ -490,27 +523,54 @@
         }
         
         // Function to submit the form
-        function submitForm() {
+        async function submitForm() {
             if (validateForm()) {
-                // Collect all form data
-                const formData = {
-                    country: document.getElementById('country').value,
-                    q1: document.querySelector('input[name="q1"]:checked')?.value || '',
-                    q2: document.querySelector('input[name="q2"]:checked')?.value || '',
-                    q3: document.getElementById('q3').value,
-                    q4: document.querySelector('input[name="q4"]:checked')?.value || '',
-                    q5: document.querySelector('input[name="q5"]:checked')?.value || '',
-                    q6: document.querySelector('input[name="q6"]:checked')?.value || '',
-                    q7: document.querySelector('input[name="q7"]:checked')?.value || ''
-                };
+                // Show loading state
+                const submitButton = document.querySelector('.btn-submit');
+                submitButton.disabled = true;
+                submitButton.querySelector('.spinner').style.display = 'inline-block';
+                submitButton.classList.add('is-loading');
                 
-                // Log the form data (in a real app, you would send this to a server)
-                console.log('Form data submitted:', formData);
-                
-                // Show thank you page
-                document.getElementById('surveyForm').style.display = 'none';
-                document.getElementById('thankYouPage').style.display = 'block';
-                window.scrollTo(0, 0);
+                try {
+                    // Collect form data
+                    const formData = {
+                        country: document.getElementById('country').value,
+                        satisfaction_level: document.querySelector('input[name="q1"]:checked')?.value || '',
+                        strengths: document.querySelector('input[name="q2"]:checked')?.value || '',
+                        improvement_recommendations: document.getElementById('q3').value,
+                        faced_challenges: document.querySelector('input[name="q4"]:checked')?.value === 'Yes',
+                        main_challenge: document.querySelector('input[name="q5"]:checked')?.value || null,
+                        support_assessment: document.querySelector('input[name="q6"]:checked')?.value || '',
+                        manager_discussion_quality: document.querySelector('input[name="q7"]:checked')?.value || ''
+                    };
+                    
+                    // Send data to API endpoint
+                    const response = await fetch('/api/submit-survey', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to submit survey');
+                    }
+                    
+                    // Show thank you page
+                    document.getElementById('surveyForm').style.display = 'none';
+                    document.getElementById('thankYouPage').style.display = 'block';
+                    window.scrollTo(0, 0);
+                } catch (error) {
+                    console.error('Error submitting form:', error);
+                    alert('There was an error submitting your survey. Please try again.');
+                    
+                    // Reset button state
+                    submitButton.disabled = false;
+                    submitButton.querySelector('.spinner').style.display = 'none';
+                    submitButton.classList.remove('is-loading');
+                }
             } else {
                 // Scroll to the first error
                 const firstError = document.querySelector('.error');
