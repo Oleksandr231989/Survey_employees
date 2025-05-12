@@ -548,7 +548,7 @@
                     
                     // Use XMLHttpRequest instead of fetch to ensure proper error handling
                     const xhr = new XMLHttpRequest();
-                    xhr.open('POST', '/api/submit-survey');
+                    xhr.open('POST', '/api/submit-survey.js');  // CHANGED LINE - added .js extension
                     xhr.setRequestHeader('Content-Type', 'application/json');
                     
                     xhr.onload = function() {
