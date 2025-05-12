@@ -30,6 +30,7 @@
             padding: 20px;
             text-align: center;
             position: relative;
+            padding-top: 60px; /* Increased to make room for the toggle */
         }
         
         .header h1 {
@@ -218,14 +219,15 @@
         /* Language Toggle */
         .language-toggle {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 15px; /* Moved to top */
+            right: 15px;
             display: flex;
             background-color: white;
             border-radius: 4px;
             overflow: hidden;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             border: 1px solid #e5e7eb;
+            z-index: 10; /* Ensure it's on top */
         }
         
         .language-toggle button {
