@@ -1,6 +1,17 @@
 const { createClient } = require('@supabase/supabase-js');
 
 module.exports = async (req, res) => {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+  // Handle OPTIONS request
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -21,11 +32,25 @@ module.exports = async (req, res) => {
     console.log('Supabase URL present:', !!supabaseUrl);
     console.log('Supabase Key present:', !!supabaseKey);
     
-    // Create Supabase client
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Create Supabase client with additional options
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+    
+    // Ensure we have a valid request body
+    if (!req.body) {
+      return res.status(400).json({ error: 'Missing request body' });
+    }
     
     // Log request body
-    console.log('Request body:', JSON.stringify(req.body));
+    try {
+      console.log('Request body:', typeof req.body === 'string' ? req.body : JSON.stringify(req.body));
+    } catch (e) {
+      console.log('Could not stringify request body');
+    }
     
     // Get form data from request body
     const {
@@ -56,7 +81,7 @@ module.exports = async (req, res) => {
       main_challenge: faced_challenges ? main_challenge : null,
       support_assessment,
       manager_discussion_quality,
-      ip_address: req.headers['x-forwarded-for'] || req.socket.remoteAddress
+      ip_address: req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown'
     };
     
     console.log('Data to insert:', JSON.stringify(insertData));
