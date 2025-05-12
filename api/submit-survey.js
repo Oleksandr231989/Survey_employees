@@ -6,39 +6,56 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
-
+  
   // Handle OPTIONS request
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-
+  
   // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-
+  
   try {
     console.log('Request received in API');
     
-    // Get Supabase credentials from environment variables
+    // Get Supabase credentials with more robust logging
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    console.log('Supabase URL present:', !!supabaseUrl);
+    console.log('Supabase Key present:', !!supabaseKey);
     
     if (!supabaseUrl || !supabaseKey) {
       console.error('Missing Supabase credentials');
       return res.status(500).json({ error: 'Server configuration error: Missing Supabase credentials' });
     }
     
-    console.log('Supabase URL present:', !!supabaseUrl);
-    console.log('Supabase Key present:', !!supabaseKey);
-    
-    // Create Supabase client with additional options
+    // Test Supabase connection first
     const supabase = createClient(supabaseUrl, supabaseKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false
       }
     });
+    
+    // Simple test query to verify connection
+    try {
+      const { data: testData, error: testError } = await supabase
+        .from('survey_responses')
+        .select('count', { count: 'exact', head: true });
+        
+      if (testError) {
+        console.error('Supabase connection test failed:', testError);
+        return res.status(500).json({ error: 'Supabase connection failed: ' + testError.message });
+      }
+      
+      console.log('Supabase connection successful');
+    } catch (connError) {
+      console.error('Supabase connection error:', connError);
+      return res.status(500).json({ error: 'Supabase connection error: ' + connError.message });
+    }
     
     // Ensure we have a valid request body
     if (!req.body) {
