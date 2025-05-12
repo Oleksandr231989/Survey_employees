@@ -546,28 +546,56 @@
                     
                     console.log('Form data being sent:', JSON.stringify(formData));
                     
-                    // Send data to API endpoint
-                    const response = await fetch('/api/submit-survey', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(formData)
-                    });
+                    // Use XMLHttpRequest instead of fetch to ensure proper error handling
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/api/submit-survey');
+                    xhr.setRequestHeader('Content-Type', 'application/json');
                     
-                    console.log('Response status:', response.status);
+                    xhr.onload = function() {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            console.log('Success response:', xhr.responseText);
+                            try {
+                                const result = JSON.parse(xhr.responseText);
+                                // Show thank you page
+                                document.getElementById('surveyForm').style.display = 'none';
+                                document.getElementById('thankYouPage').style.display = 'block';
+                                window.scrollTo(0, 0);
+                            } catch (e) {
+                                console.error('Error parsing response:', e);
+                                alert('Error processing response. Please try again or contact support.');
+                                
+                                // Reset button state
+                                submitButton.disabled = false;
+                                submitButton.querySelector('.spinner').style.display = 'none';
+                                submitButton.classList.remove('is-loading');
+                            }
+                        } else {
+                            console.error('Error response:', xhr.status, xhr.responseText);
+                            try {
+                                const errorResult = JSON.parse(xhr.responseText);
+                                alert('Error: ' + (errorResult.error || 'Failed to submit survey') + '. Please try again or contact support.');
+                            } catch (e) {
+                                alert('Error submitting survey. Please try again or contact support.');
+                            }
+                            
+                            // Reset button state
+                            submitButton.disabled = false;
+                            submitButton.querySelector('.spinner').style.display = 'none';
+                            submitButton.classList.remove('is-loading');
+                        }
+                    };
                     
-                    const result = await response.json();
-                    console.log('Response data:', result);
+                    xhr.onerror = function() {
+                        console.error('Network error occurred');
+                        alert('Network error occurred. Please check your connection and try again.');
+                        
+                        // Reset button state
+                        submitButton.disabled = false;
+                        submitButton.querySelector('.spinner').style.display = 'none';
+                        submitButton.classList.remove('is-loading');
+                    };
                     
-                    if (!response.ok) {
-                        throw new Error(result.error || 'Failed to submit survey');
-                    }
-                    
-                    // Show thank you page
-                    document.getElementById('surveyForm').style.display = 'none';
-                    document.getElementById('thankYouPage').style.display = 'block';
-                    window.scrollTo(0, 0);
+                    xhr.send(JSON.stringify(formData));
                 } catch (error) {
                     console.error('Error submitting form:', error);
                     alert('Error: ' + error.message + '. Please try again or contact support.');
